@@ -1,4 +1,33 @@
 # Database Management Systems
+## Transactions
+- Concurrent operations may cause problems.
+  - Lost Update Problem: T2 updates the data between the time when T1 reads the data and updates it so that T1's update is lost.
+  - Temporary Update Problem: T2 reads T1's update, but T1 is reverted after that.
+  - Incorrect Summary Problem: T1 is applying aggregation while T2 is updating these data.
+  - Unrepeatable Read Problem: When the same value is read twice but modified in between.
+- A transaction is a logical grouping of operations.
+- ACID 
+  - Atomicity: run every operation or nothing (rollback).
+  - Consistency: database must start and end in consistent states (it may be in an inconsistent state when a transaction is not committed).
+  - Isolation: every transaction is unaware of any others.
+  - Durability: If a transaction has been committed, it must be permanent. (use log files for rollback and recovery)
+- Conflicts: Read/Write and Write/Write conflicts.
+- Serializable Schedule: equivalent to a serial schedule. (Serializable Test by the precedence graph)
+-   
+
+## Locks
+- Shared(read) lock, Exclusive(write) lock.
+- Two Phase Locking: acquisition phase + release phase. Guarantees serializability(sacrifice performance).
+  - Basic
+  - Conservative: Acquire all locks that I need before starting the transaction. (avoid deadlock)
+  - Strict: I'm gonna hold all write locks until the very end of the transaction. (prevent Temporary Update)
+- Deadlock: Both transactions are waiting for each other's locks. (detect by a graph)
+  - Prevention: wait-die, wound-wait, no-wait, cautious wait.
+- Granularity: Fields, Columns, Pages, Tables.
+  - Smaller granularity -> better performance for higher Concurrency, but lock management will be more complicated.
+  - Granularity Tree. traverse: db->files->pages->rows...
+    - Intention locks: indicates that locks exist in my children. (no need to traverse the tree and make sure every row isn't locked before acquiring lock)
+
 ## Distributed Databases
 **Transparency** (User perspective)
 - Data organization transparency
@@ -13,7 +42,7 @@
 
 Why do we want to distribute the data? For better **fault tolerance**.
 **Reliability**: how long does it take something to fail on average. (metric of time)
-**availability**: probability that the system is continuously available over a period of time (metric of probability).
+**Availability**: probability that the system is continuously available over a period of time (metric of probability).
 Flexibility, improved performance, easier expansion.
 
 Replication: more reliable, more available, more cost for keeping consistency.
@@ -90,3 +119,33 @@ https://www.mongodb.com/docs/manual/tutorial/getting-started/
     - Design: embedded structure or referencing (foreign key)? It's all about how we want to access the data.
     - Objects: each object has a unique ObjectID (12 bytes).
       - ObjectID: TimeStamp(4B) + Machine(3B) + PID(2B) + Increment (3B, break ties).
+## Redis
+- key-value pairs. In-memory database (performance boost, more availability).
+- Use cases: storing session information, user profiles, shopping cart data, ...
+### Commands
+
+key-value
+``` 
+SET <key> <value> GET/DEL/EXISTS <key>
+```
+
+Hash Set
+```redis
+HSET student:1 "name" "jushen" "age" 22 "gender" "male"  // 
+HSET student:2 "name" "ruiqi" "age" 22 "gender" "female"
+HGET student:2 "name"  // "ruiqi"
+HGETALL student:2 #   // Print the whole document
+HSET student:1 "age" 23  // Update/Create the age field of student:1
+HDEL student:1 "gender"  // Delete a field
+```
+Index
+```
+FT.CREATE idx:students ... ON HASH PREFIX 1 "student:" ...
+FT._LIST  // Return all indices.
+FT.SEARCH idx:students "jushen" RETURN 2 name age  // Query based on the index
+FT.SEARCH idx:students "@name:jushen" RETURN 2 name age  // Search from the name field. Project 2 columns, show 2 results.
+FT.SEARCH idx:students "@age:[0,100] | @name:ruiqi"
+```
+### Graph DB: Neo4j
+- Consistency, Transactions, Availability, Scaling.
+- For connected data, Recommendation engines, and routing, dispatch, location-based services.

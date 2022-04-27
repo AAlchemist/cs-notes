@@ -87,3 +87,20 @@ def update(self, state, action, nextState, reward):
     for feature, value in features.items():
         self.weights[feature] += self.alpha * difference * value
 ```
+## Logic
+- Propositional Logic (facts: T/F/UNKNOW)
+  -  negation ¬, disjunction ⋁, conjunction ⋀, implication ⇒, equivalence ⇔.
+  -  truth table, each row is called a model. Valid/satisfiable/unsatisfiable sentence.
+  -  P⇒Q ≣ ¬P V Q, P ⇔ Q ≣ (P⇒Q) ⋀ (Q⇒P)
+- Entailment
+  - Knowledge Base (KB) ⊨ Sentence (I win)
+  - Normal Forms
+    - DNF (Disjuctive Normal Forms): Disjunction of conjunctions.
+    - CNF (Conjunctive Normal Forms): Conjunction of disjunctions.
+      - Horn form: Conjunction of Horn clause (clauses with 0~1 positive literal).
+  - Modus Ponens: (P⋁Q) ⋀ (¬Q⋁R) entails (P⋁R)
+  - Four ways to check for entailment
+    - **Brute-force model checking** in the truth table (not scalable). 
+    - **Resolution** (Proof by contradiction)： we include the negation of the query in the KB, and prove that the KB is unsatisfiable by using CNF and Modus Ponens.
+    - **Forward chaining**: Use Modus Ponens to infer if a query is true. (Just like Resolution but don't add the negation of the query into the KB).
+    - **Backward chaining**: Just like Resolution but uses DPLL/WALKSAT instead of Modus Ponens to check for unsatisfiability.
